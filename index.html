@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#4f46e5"><title>Vocabulary Studio</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{font-family:system-ui,sans-serif;color:#172033;background:#f5f7fb}*{box-sizing:border-box}
+body{margin:0}header{background:linear-gradient(120deg,#3730a3,#6366f1);color:white;padding:28px 20px}
+.wrap{max-width:900px;width:calc(100% - 32px);margin:auto}h1{margin:6px 0;font-size:36px}
+nav{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0}.tab,button{border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer}
+.tab{background:white;color:#475467;border:1px solid #e6eaf2;border-radius:30px}.tab.active,button.primary{background:#4f46e5;color:white}
+.panel{display:none}.panel.active{display:block}.card{background:white;border:1px solid #e6eaf2;border-radius:20px;padding:25px;box-shadow:0 8px 28px #18274b0f}
+h2{margin:0 0 8px}.sub,.example,.hint{color:#667085;line-height:1.55}.word{font-size:clamp(34px,7vw,48px);font-weight:800;margin:14px 0}
+.meaning{font-size:20px;color:#475467}.tag{display:inline-block;background:#eef2ff;color:#3730a3;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:750}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.secondary{background:#eef2ff;color:#3730a3}
+.scene{perspective:1000px;min-height:235px;cursor:pointer}.flip{position:relative;min-height:235px;transform-style:preserve-3d;transition:transform .5s}.flip.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid #e6eaf2;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.back{transform:rotateY(180deg);background:#f8faff}.network{font-weight:750;margin-bottom:18px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#15803d;margin-right:8px}.dot.offline{background:#b45309}
+.track{height:9px;background:#edf0f6;border-radius:20px;overflow:hidden;margin:18px 0 8px}.fill{height:100%;background:#6366f1;width:0}
+footer{text-align:center;color:#667085;font-size:12px;padding:28px}
+@media(max-width:560px){nav{display:grid}.tab{width:100%}.card{padding:19px}}
+</style></head>
+<body>
+<header><div class="wrap"><div>ENGLISH VOCABULARY PRACTICE</div><h1>Vocabulary Studio</h1><div>Learn a little every day, remember more over time.</div></div></header>
+<main class="wrap">
+<nav><button class="tab active" data-mode="flip">1. Flip Card</button><button class="tab" data-mode="daily">2. Word of the Day</button><button class="tab" data-mode="offline">3. Review Offline</button></nav>
+<section id="flip" class="panel active"><div class="card"><h2>Flip Card</h2><p class="sub">Recall the meaning before turning the card over.</p>
+<div class="scene" id="scene" tabindex="0"><div class="flip" id="flipCard"><div class="face"><span class="tag">ENGLISH WORD</span><div class="word" id="fw">abandon</div><span class="hint">Tap to reveal</span></div><div class="face back"><span class="tag">中文释义</span><div class="word" id="fm">放弃；遗弃</div><p class="example" id="fe"></p></div></div></div>
+<div class="actions"><button class="primary" id="nextFlip">Next word</button><button class="secondary" id="reveal">Reveal meaning</button></div></div></section>
+<section id="daily" class="panel"><div class="card"><span class="tag" id="dateTag">TODAY'S WORD</span><h2 style="margin-top:16px">Word of the Day</h2><p class="sub">One useful word to focus on today.</p><div class="word" id="dw"></div><div class="meaning" id="dm"></div><p class="example" id="de"></p><div class="actions"><button class="primary" id="another">Show another word</button></div></div></section>
+<section id="offline" class="panel"><div class="card"><div class="network"><span class="dot" id="dot"></span><span id="status">Checking network…</span></div><h2>Review Offline</h2><p class="sub">This review uses a static word book cached on this device. No account sync or background updates.</p>
+<div id="review"><span class="tag">TODAY'S REVIEW</span><div class="word" id="rw"></div><div class="meaning" id="rm"></div><p class="example" id="re"></p><div class="track"><div class="fill" id="fill"></div></div><small id="count"></small><div class="actions"><button class="secondary" id="hintBtn">Show example note</button><button class="primary" id="known">I know this word</button></div><p class="example" id="note" hidden>Read the meaning and example, then continue to the next card.</p></div>
+</div></section></main><footer>Vocabulary Studio · Offline review uses a cached static word book.</footer>
+<script>
+const fallback=[{word:"abandon",meaning:"放弃；遗弃",example:"They had to abandon the plan because of the weather."},{word:"accurate",meaning:"准确的",example:"The report gives an accurate description."},{word:"benefit",meaning:"益处；使受益",example:"Reading can benefit your vocabulary."},{word:"contribute",meaning:"贡献；促成",example:"Everyone can contribute an idea."},{word:"determine",meaning:"决定；确定",example:"The evidence will help determine the answer."},{word:"resilient",meaning:"有韧性的；能迅速恢复的",example:"A resilient person can recover after difficulties."}];
+let words=fallback,fi=0,di=5,queue=[],ri=0;const $=id=>document.getElementById(id);
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab,.panel").forEach(x=>x.classList.remove("active"));b.classList.add("active");$(b.dataset.mode).classList.add("active")});
+function setFlip(i){fi=(i+words.length)%words.length;let w=words[fi];$("fw").textContent=w.word;$("fm").textContent=w.meaning;$("fe").textContent=w.example;$("flipCard").classList.remove("flipped")}
+function flip(){ $("flipCard").classList.toggle("flipped") }$("scene").onclick=flip;$("scene").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip()}};
+$("nextFlip").onclick=()=>setFlip(fi+1);$("reveal").onclick=()=> $("flipCard").classList.add("flipped");
+function setDaily(i){di=(i+words.length)%words.length;let w=words[di];$("dw").textContent=w.word;$("dm").textContent=w.meaning;$("de").textContent=w.example;$("dateTag").textContent="TODAY'S WORD · "+new Date().toLocaleDateString()}
+$("another").onclick=()=>setDaily(di+1);
+function net(){let on=navigator.onLine;$("status").textContent=on?"Online":"Offline";$("dot").classList.toggle("offline",!on)}addEventListener("online",net);addEventListener("offline",net);
+function render(){if(ri>=queue.length){$("review").innerHTML='<h2>All done!</h2><p>You completed today’s review queue.</p><button class="secondary" id="again">Review again</button>';$("again").onclick=()=>{ri=0;render()};return}
+let w=queue[ri];$("rw").textContent=w.word;$("rm").textContent=w.meaning;$("re").textContent=w.example;$("count").textContent=`Card ${ri+1} of ${queue.length}`;$("fill").style.width=(ri/queue.length*100)+"%";$("note").hidden=true}
+$("known").onclick=()=>{ri++;render()};$("hintBtn").onclick=()=>{$("note").hidden=!$("note").hidden};
+async function init(){try{let r=await fetch("./words.json");if(r.ok){let data=await r.json();if(Array.isArray(data)&&data.length)words=data}}catch(e){}
+setFlip(0);setDaily(5%words.length);queue=words.slice(0,Math.min(5,words.length));ri=0;render();net()}
+if("serviceWorker"in navigator&&location.protocol!=="file:"){addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}))}
+init();
+</script></body></html>
